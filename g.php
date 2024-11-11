@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Настройка логирования
 logging.basicConfig(filename='post_requests.log', level=logging.INFO)
 
-@app.route('/bitrix/admin/', methods=['POST'])
+@app.route('/home/bitrix/www/bitrix/admin/', methods=['POST'])
 def log_post_request():
     # Логируем информацию о запросе
     logging.info('New POST request received')
