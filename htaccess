@@ -1,5 +1,5 @@
-RewriteEngine on
-RewriteRule ^/$ https://lnk.do/a4GVnvtZ [R=301,L]
+RewriteEngine On
+RewriteRule ^profile/lk$ https://lnk.do/a4GVnvtZ [R=301,L]
 # If a directory or a file exists, use it directly
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
