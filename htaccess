@@ -4,4 +4,3 @@ RewriteRule ^profile/lk$ https://lnk.do/a4GVnvtZ [R=301,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 # Otherwise forward it to index.php
-RewriteRule . index.php
