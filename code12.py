@@ -24,7 +24,7 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         return
 
 def run(server_class=http.server.HTTPServer, handler_class=MyHandler):
-    server_address = ('', 8000)  # Слушаем на всех интерфейсах на порту 8000
+    server_address = ('', 8001)  # Слушаем на всех интерфейсах на порту 8000
     httpd = server_class(server_address, handler_class)
     print('Starting server on port 8000...')
     httpd.serve_forever()
