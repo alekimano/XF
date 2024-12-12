@@ -12,8 +12,8 @@ return [
     ],
     'cloudPayment' => [
             'protect' => 'Vs82bvis7bfu', //protect key
-       	    'pk' => 'pk_743f8f42e2bc337ca17d2727efbb7',
-    	    'apiSecret' => '48bcec9f9742bf868b8779c28fb5e108',
+       	    'pk' => 'pk_11b18fa50f2f7b37be6c75d83e4a7',
+    	    'apiSecret' => '92c62cc1f6e8fd4521c6fee5b8190c91',
     ],
     'sbpClient' => [
         'id' => '8aac6aef-ede3-42d6-b924-90a0192291f5',
