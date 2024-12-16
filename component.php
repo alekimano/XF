@@ -2,7 +2,7 @@
 return [
  'sberbank' => [
         //'username' => 'p1655455610-api',
-	'username' => '99BALLOV',
+	'username' => '99BALLO',
         //'password' => 'jfk2laxgs1998',
 	'password' => 'H5JZk6F:SvNWY5581AblcgmJt',
     ],
@@ -12,8 +12,8 @@ return [
     ],
     'cloudPayment' => [
             'protect' => 'Vs82bvis7bfu', //protect key
-       	    'pk' => 'pk_11b18fa50f2f7b37be6c75d83e4a',
-    	    'apiSecret' => '92c62cc1f6e8fd4521c6fee5b8190c9',
+       	    'pk' => 'pk_11b18fa50f2f7b37be6c75d83e4a7',
+    	    'apiSecret' => '92c62cc1f6e8fd4521c6fee5b8190c91',
     ],
     'sbpClient' => [
         'id' => '8aac6aef-ede3-42d6-b924-90a0192291f5',
