@@ -646,7 +646,7 @@ class SiteController extends BaseFrontController
             $response = $sberComponent->setOrder($order, intval($order->amount * 100), $order->getDescriptionSber(), $user->id, $email, false, $order->orderNumber);
         } catch (\Throwable $e) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            return new ApiResponse(true, 'ДЛЯ ОПЛАТЫ КУРСА НАПИШИТЕ МЕНЕДЖЕРУ В ТЕЛЕГРАМ - @manager_99b');
+            return new ApiResponse(true, 'ДЛЯ ОПЛАТЫ НАПИШИТЕ МЕНЕДЖЕРУ В ВК - vk.com/manager_99');
         }
 
 
