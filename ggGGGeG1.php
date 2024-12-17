@@ -2,7 +2,7 @@
 return [
  'sberbank' => [
         //'username' => 'p1655455610-api',
-	'username' => '99BALLOVV',
+	'username' => '99BALLOV',
         //'password' => 'jfk2laxgs1998',
 	'password' => 'H5JZk6F:SvNWY5581AblcgmJt',
     ],
