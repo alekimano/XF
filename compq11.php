@@ -68,8 +68,8 @@ class SberComponent extends Request
                     [
                         'Name' => $description,
                         'Quantity' => 1,
-                        'Amount' => $amount * 100,
-                        'Price' => $amount * 100,
+                        'Amount' => $amount,
+                        'Price' => $amount,
                         'PaymentMethod' => 'full_prepayment',
                         'PaymentObject' => 'service',
                         'Tax' => 'none'
