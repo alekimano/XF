@@ -20,10 +20,13 @@ use yii\httpclient\Client;
  */
 class SberComponent extends Request
 {
-//    protected string $_devHost = 'https://3dsec.sberbank.ru';
-    protected string $_devHost = 'https://ecomtest.sberbank.ru';//Новый шлюз
-//    protected string $_prodHost = 'https://securepayments.sberbank.ru';
-    protected string $_prodHost = 'https://ecommerce.sberbank.ru';//Новый шлюз
+    //    protected string $_devHost = 'https://3dsec.sberbank.ru';
+    // protected string $_devHost = 'https://ecomtest.sberbank.ru'; //Новый шлюз
+    //    protected string $_prodHost = 'https://securepayments.sberbank.ru';
+    // protected string $_prodHost = 'https://ecommerce.sberbank.ru'; //Новый шлюз
+    protected string $_devHost = 'https://rest-api-test.tinkoff.ru';
+    protected string $_prodHost = 'https://securepay.tinkoff.ru';
+
 
     const FEATURES_AUTO_PAYMENT = 'AUTO_PAYMENT';
 
@@ -31,90 +34,10 @@ class SberComponent extends Request
      * @brief Получить автор
      * @return array
      */
-    protected function getAuthorization():array
+    protected function getAuthorization(): array
     {
         return \Yii::$app->params['sberbank'];
     }
-
-//      Старый шлюз
-//    /**
-//     * @param Order $order
-//     * @param float $amount
-//     * @param string $description
-//     * @param int|null $clientId
-//     * @param string|null $email
-//     * @param bool $autoPayment
-//     * @param string|null $orderNumber
-//     * @return mixed
-//     * @throws \yii\base\InvalidConfigException
-//     * @throws \yii\httpclient\Exception
-//     */
-//    public function setOrder(Order $order, float $amount, string $description, int $clientId = null, string $email = null, bool $autoPayment = false, string $orderNumber = null)
-//    {
-//        if ($orderNumber) {
-//            $response = $this->getOrder($orderNumber);
-//            if ($response) {
-//                if (isset($response->actionCodeDescription) && $response->actionCodeDescription !== '') {
-//                    $data['orderNumber'] = $order->id . '-' . time();
-//                    $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/register.do'));
-//                    SystemLog::create('setOrder expired ' . json_encode(get_object_vars($response)), 'sber');
-//                    return $response;
-//                } else {
-//                    if (!$response->orderId) throw new \Exception('Не верный формат пришел');
-//                    return (object)['orderId' => $response->orderId, 'formUrl' => $this->host() . '/payment/merchants/sbersafe_sberid/payment_ru.html?mdOrder=' . $response->orderId];
-//                }
-//            } else {
-//                throw new \Exception('Произошла ошибка');
-//            }
-//        }
-//        $data = [
-//            'orderNumber' => $order->id,
-//            'amount' => $amount,
-//            'returnUrl' => \Yii::$app->params['baseUrl'] . '/course/master-group',
-//            'description' => $description,
-//        ];
-//
-//        $data = $this->getDataAuthorization($data);
-//
-//        if ($clientId) {
-//            $data['clientId'] = $clientId;
-//        }
-//        if ($email) {
-//            $data['email'] = $email;
-//        }
-//        if ($autoPayment) {
-//            $data['features'] = self::FEATURES_AUTO_PAYMENT;
-//        }
-//        $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/register.do'));
-//        SystemLog::create('setOrder ' . json_encode(get_object_vars($response)), 'sber');
-//
-//        if (isset($response->errorCode) && $response->errorCode) {
-//            switch ($response->errorCode) {
-//                case 1:
-//                    $response = $orderNumber ? $this->getOrder($orderNumber) : $this->getOrderNumber($data['orderNumber']);
-//                    if ($response) {
-//                        if (isset($response->actionCodeDescription) && $response->actionCodeDescription !== '') {
-//                            $data['orderNumber'] = $order->id . '-' . time();
-//                            $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/register.do'));
-//                            SystemLog::create('setOrder expired ' . json_encode(get_object_vars($response)), 'sber');
-//                            return $response;
-//                        } else {
-//                            if (!$response->orderId) throw new \Exception('Не верный формат пришел');
-//                            return (object)['orderId' => $response->orderId, 'formUrl' => $this->host() . '/payment/merchants/sbersafe_sberid/payment_ru.html?mdOrder=' . $response->orderId];
-//                        }
-//                    } else {
-//                        throw new \Exception('Произошла ошибка');
-//                    }
-//                case 5:
-//                    throw new \Exception('Доступ запрещен');
-//                default:
-//                    throw new \Exception('Произошла ошибка');
-//            }
-//        }
-//
-//        return $response;
-//    }
-
 
     //Новый шлюз
     /**
@@ -133,109 +56,74 @@ class SberComponent extends Request
     {
         $positionId = $order->invoice_id ?? $order->course_id;
         $data = [
-            'orderNumber' => (string)$order->id,
-            'amount' => $amount,
-            'returnUrl' => \Yii::$app->params['baseUrl'] . '/course/master-group',
-            'description' => $description,
-            'orderBundle' => [
-                'ffdVersion' => '1.05',
-                'receiptType' => 'sell',
-                'company' => [
-                    'email' => 'support@99ballov.ru',
-                    'inn' => Yii::$app->params['organizationData']['inn'],
-                    'paymentAddress' => 'https://lk.99ballov.ru',
-                    'sno' => 'osn',
-                ],
-                'total' => $amount,
-                'payments' => [
+            'TerminalKey' => Yii::$app->params['tinkoff']['terminal_key'],
+            'Amount' => $amount,
+            'OrderId' => (string)$order->id,
+            'Description' => $description,
+            'NotificationURL' => Yii::$app->params['baseUrl'] . '/payment/notification',
+            'SuccessURL' => Yii::$app->params['baseUrl'] . '/course/master-group',
+            'FailURL' => Yii::$app->params['baseUrl'] . '/payment/fail',
+            'Receipt' => [
+                'Items' => [
                     [
-                        'type' => 1,
-                        'sum' => $amount,
+                        'Name' => $description,
+                        'Quantity' => 1,
+                        'Amount' => $amount * 100,
+                        'Price' => $amount * 100,
+                        'PaymentMethod' => 'full_prepayment',
+                        'PaymentObject' => 'service',
+                        'Tax' => 'none'
                     ]
                 ],
-                'cartItems' => [
-                    'items' => [
-                        [
-                            'positionId' => (string)$positionId,
-                            'itemCode' => (string)$positionId,
-                            'name' => $description,
-                            'quantity' => [
-                                'value' => 1,
-                                "measure" => '0'
-                            ],
-                            'itemPrice' => $amount,
-                            'itemAmount' => $amount,
-                            'paymentMethod' => 'full_payment',
-                            'paymentObject' => 'service',
-                            'tax' => [
-                                'taxType' => 0,
-                            ]
-                        ]
-                    ],
-                ]
+                'Email' => $email ?? 'support@99ballov.ru',
+                'Taxation' => 'osn'
             ]
         ];
-        $data = $this->getDataAuthorization($data);
+
+        if ($autoPayment) {
+            $data['Recurrent'] = 'Y';
+        }
 
         if ($clientId) {
-            $data['clientId'] = (string)$clientId;
+            $data['CustomerKey'] = (string)$clientId;
         }
 
-        if ($email) {
-            $data['email'] = $email;
-        }
-        if ($autoPayment) {
-            $data['features'] = self::FEATURES_AUTO_PAYMENT;
+        $data['Token'] = $this->generateToken($data);
+
+        $response = json_decode($this->sendRequest($data, 'post', '/v2/Init'));
+        SystemLog::create('setOrder ' . json_encode($response), 'tinkoff', $order->id);
+
+        if (!$response) {
+            throw new \Exception('Некорректный ответ от платежного шлюза: ' . json_encode($response));
         }
 
-        if ($orderNumber) {
-            $response = $this->getOrder($orderNumber);
-            if ($response) {
-                if (isset($response->actionCodeDescription) && $response->actionCodeDescription !== '' && $response->orderStatus != OrderStatus::ORDER_STATUS_NEW) {
-                    $data['orderNumber'] = $order->id . '-' . time();
-                    $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/register.do'));
-                    SystemLog::create('setOrder expired ' . json_encode(get_object_vars($response)), 'sber', $order->id);
-                    return $response;
-                } else {
-                    if (!$response->orderId) throw new \Exception('Не верный формат пришел');
-//                    return (object)['orderId' => $response->orderId, 'formUrl' => $this->host() . '/payment/merchants/sbersafe_sberid/payment_ru.html?mdOrder=' . $response->orderId];
-                    $url = 'https://';
-                    if (defined('YII_ENV') && YII_ENV === 'dev') {
-                        $url .= 'sbox.';
-                    }
-                    return (object)['orderId' => $response->orderId, 'formUrl' => $url . 'payecom.ru/pay_ru?orderId=' . $response->orderId];
-                }
-            } else {
-                throw new \Exception('Произошла ошибка');
+        return (object)[
+            'orderId' => $response->PaymentId,
+            'formUrl' => $response->PaymentURL
+        ];
+    }
+
+    /**
+     * Генерация токена для подписи запроса
+     */
+    protected function generateToken(array $data): string
+    {
+        $password = Yii::$app->params['tinkoff']['password'];
+        ksort($data);
+
+        // Фрмируем строку для подписи
+        $values = '';
+        foreach ($data as $key => $value) {
+            if ($key === 'Receipt') {
+                continue; // Пропускаем объект Receipt при формировании подписи
+            }
+            if (!empty($value)) {
+                $values .= $value;
             }
         }
 
-        $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/register.do'));
-        SystemLog::create('setOrder ' . json_encode(get_object_vars($response)), 'sber', $order->id);
-
-        if (isset($response->errorCode) && $response->errorCode) {
-            switch ($response->errorCode) {
-                case 1:
-                    $response = $orderNumber ? $this->getOrder($orderNumber) : $this->getOrderNumber($data['orderNumber']);
-                    if ($response) {
-                        if (isset($response->actionCodeDescription) && $response->actionCodeDescription !== '') {
-                            $data['orderNumber'] = $order->id . '-' . time();
-                            $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/register.do'));
-                            SystemLog::create('setOrder expired ' . json_encode(get_object_vars($response)), 'sber', $order->id);
-                            return $response;
-                        } else {
-                            if (!$response->orderId) throw new \Exception('Не верный формат пришел');
-                            return (object)['orderId' => $response->orderId, 'formUrl' => $this->host() . '/payment/merchants/sbersafe_sberid/payment_ru.html?mdOrder=' . $response->orderId];
-                        }
-                    } else {
-                        throw new \Exception('Произошла ошибка');
-                    }
-                default:
-                    throw new \Exception('Произошла ошибка');
-            }
-        }
-
-        return $response;
+        // Возвращаем SHA-256 хеш
+        return hash('sha256', $password . $values);
     }
 
     /**
@@ -252,8 +140,8 @@ class SberComponent extends Request
         ];
         $data = $this->getDataAuthorization($data);
 
-//        return json_decode($this->sendRequest($data, 'post', '/payment/rest/reverse.do'));
-        return json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/reverse.do'));//Новый шлюз
+        //        return json_decode($this->sendRequest($data, 'post', '/payment/rest/reverse.do'));
+        return json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/reverse.do')); //Новый шлюз
     }
 
     /**
@@ -270,8 +158,8 @@ class SberComponent extends Request
         ];
         $data = $this->getDataAuthorization($data);
 
-//        return json_decode($this->sendRequest($data, 'post', '/payment/rest/getBindings.do'));
-        return json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/getBindings.do'));//Новый шлюз
+        //        return json_decode($this->sendRequest($data, 'post', '/payment/rest/getBindings.do'));
+        return json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/getBindings.do')); //Новый шлюз
     }
 
     /**
@@ -281,71 +169,110 @@ class SberComponent extends Request
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public function getOrderNumber(string $id):OrderStatus
+    public function getOrderNumber(string $id): OrderStatus
     {
         $data = [
             'orderNumber' => $id,
         ];
         $data = $this->getDataAuthorization($data);
 
-//        $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY);
-        $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY);//Новый шлюз
+        //        $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY);
+        $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY); //Новый шлюз
         SystemLog::create('getOrderNumber ' . json_encode($response), 'sber', (int)$id);
         return new OrderStatus($response);
     }
 
     /**
-     * @brief Автоплатеж
-     * @param string $orderId
-     * @param string|null $email
-     * @param string $bindingId
+     * Автоматическое зачисление средств после оплаты
+     * @param string $paymentId ID платежа из Init
+     * @param string $rebillId ID рекуррентного платежа
+     * @param string|null $email Email для уведомлений
      * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception
+     * @throws \Exception
      */
-    public function autoPayment(string $orderId, string $bindingId, string $email = null)
+    public function autoPayment(string $paymentId, string $rebillId, string $email = null)
     {
         $data = [
-            'mdOrder' => $orderId,
-            'bindingId' => $bindingId,
-            'email' => $email,
+            'TerminalKey' => Yii::$app->params['tinkoff']['terminal_key'],
+            'PaymentId' => $paymentId,
+            'RebillId' => $rebillId
         ];
 
-        $data = $this->getDataAuthorization($data);
-
         if ($email) {
-            $data['email'] = $email;
+            $data['SendEmail'] = true;
+            $data['InfoEmail'] = $email;
         }
 
-//        return json_decode($this->sendRequest($data, 'post', '/payment/rest/paymentOrderBinding.do?' . http_build_query($data)));
-        return json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/paymentOrderBinding.do'));//Новый шлюз
+        $data['Token'] = $this->generateToken($data);
+
+        $response = json_decode($this->sendRequest($data, 'post', '/v2/Charge'));
+        SystemLog::create('autoPayment response: ' . json_encode($response), 'tinkoff');
+
+        if (!$response || !$response->Success) {
+            throw new \Exception('Ошибка автоматического зачисления: ' . ($response->Message ?? 'Неизвестная ошибка'));
+        }
+
+        return $response;
     }
 
     /**
-     * @brief Получить статус авторизации
-     * @param string $id
-     * @return mixed
-     * @throws \yii\base\InvalidConfigException
-     * @throws \yii\httpclient\Exception|Exception
+     * Получить статус платежа
+     * @param string $id ID платежа
+     * @return OrderStatus
+     * @throws \Exception
      */
-    public function getOrder(string $id):OrderStatus
+    public function getOrder(string $id): OrderStatus
     {
         $data = [
-            'orderId' => $id,
+            'TerminalKey' => Yii::$app->params['tinkoff']['terminal_key'],
+            'PaymentId' => $id,
+            'Token' => ''
         ];
 
-        $data = $this->getDataAuthorization($data);
+        $data['Token'] = $this->generateToken($data);
 
-//        $response = json_decode($this->sendRequest($data, 'post', '/payment/rest/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY);
-        $response = json_decode($this->sendRequest($data, 'post', '/ecomm/gw/partner/api/v1/getOrderStatusExtended.do'), JSON_OBJECT_AS_ARRAY);//Новый шлюз
-        SystemLog::create('getOrder ' . json_encode($response), 'sber');
+        $response = json_decode($this->sendRequest($data, 'post', '/v2/GetState'), true);
+        SystemLog::create('getOrder response: ' . json_encode($response), 'tinkoff');
 
         try {
-            return new OrderStatus($response);
+            if (!$response['Success']) {
+                throw new \Exception('Error getting order status: ' . ($response['Message'] ?? 'Unknown error'));
+            }
+
+            $orderStatusData = [
+                'orderNumber' => $response['OrderId'],
+                'orderStatus' => $this->mapTinkoffStatus($response['Status']),
+                'amount' => $response['Amount'],
+                'actionCodeDescription' => $response['Message'] ?? '',
+                'date' => time(),
+                'orderId' => $response['PaymentId'],
+            ];
+
+            return new OrderStatus($orderStatusData);
         } catch (\Throwable $e) {
-            ErrorLog::createLog(new \Exception('Error getOrder sber. Response: ' . json_encode($response)));
+            ErrorLog::createLog(new \Exception('Error getOrder tinkoff. Response: ' . json_encode($response)));
             throw new Exception($e);
         }
+    }
+
+    /**
+     * Преобразование статусов Тинькофф в статусы OrderStatus
+     */
+    private function mapTinkoffStatus(string $tinkoffStatus): int
+    {
+        $statusMap = [
+            'NEW' => 0,            // Заказ зарегистрирован, но не оплачен
+            'AUTHORIZED' => 1,     // Предавторизованная сумма удержана
+            'CONFIRMED' => 2,      // Проведена полная авторизация суммы заказа
+            'REVERSED' => 3,       // Авторизация отменена
+            'REFUNDED' => 4,       // Проведен возврат
+            '3DS_CHECKING' => 5,   // Инициирована авторизация через 3DS
+            'REJECTED' => 6,       // Авторизация отклонена
+            'CANCELED' => 3,       // Операция отменена
+            'DEADLINE_EXPIRED' => 6 // Истек срок ожидания
+        ];
+
+        return $statusMap[$tinkoffStatus] ?? 0;
     }
 
     /**
@@ -360,30 +287,15 @@ class SberComponent extends Request
     {
         $client = new Client();
         $response = $client->createRequest()
-            ->setMethod($method);
+            ->setMethod($method)
+            ->setFormat(Client::FORMAT_JSON)
+            ->addHeaders([
+                'Content-Type' => 'application/json'
+            ])
+            ->setData($data);
 
-        if ($data && $method == 'post') {
-//            $response->addHeaders([
-//                'content-type' => 'application/x-www-form-urlencoded',
-//            ])
-//                ->setData($data);
-            //Новый шлюз
-            $response
-                ->setFormat(\yii\web\Response::FORMAT_JSON)
-//                ->addHeaders([
-//                    'content-type' => 'application/x-www-form-urlencoded',
-//                ])
-                ->setData($data);
-        } else {
-            if ($data) {
-                $url = $url . '?' . http_build_query($data);
-            }
-        }
-
-        SystemLog::create('url '. $this->host() . $url, 'sber');
-        SystemLog::create($method . ' data: '. json_encode($data), 'sber');
-        $response->setUrl($this->host() . $url);
-
+        $response->setUrl($this->_prodHost . $url);
+        $data = $response->send();
         return $response->send()->content;
     }
 
@@ -392,7 +304,7 @@ class SberComponent extends Request
      * @param array $data
      * @return array
      */
-    protected function getDataAuthorization(array $data):array
+    protected function getDataAuthorization(array $data): array
     {
         $params = $this->getAuthorization();
         if (isset($params['token'])) {
