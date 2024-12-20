@@ -294,7 +294,7 @@ class SberComponent extends Request
             ])
             ->setData($data);
 
-        $response->setUrl($this->_prodHost . $url);
+        $response->setUrl($this->_devHost . $url);
         $data = $response->send();
         return $response->send()->content;
     }
