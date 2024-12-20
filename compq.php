@@ -57,7 +57,7 @@ class SberComponent extends Request
         $positionId = $order->invoice_id ?? $order->course_id;
         $data = [
             'TerminalKey' => Yii::$app->params['tinkoff']['terminal_key'],
-            'Amount' => $amount * 100,
+            'Amount' => $amount,
             'OrderId' => (string)$order->id,
             'Description' => $description,
             'NotificationURL' => Yii::$app->params['baseUrl'] . '/payment/notification',
