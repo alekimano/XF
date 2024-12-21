@@ -68,9 +68,7 @@ class SberController extends Controller
             }
 
             $order = Order::findOne(['orderNumber' => $paymentId]);
-            var_dump($paymentId);
-            var_dump($order);
-            die();
+       
             if (!$order) {
                 return ['error' => true, 'message' => 'Order not found'];
             }
