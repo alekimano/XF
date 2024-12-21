@@ -60,9 +60,9 @@ class SberComponent extends Request
             'Amount' => $amount,
             'OrderId' => (string)$order->id,
             'Description' => $description,
-            'NotificationURL' => Yii::$app->params['baseUrl'] . '/payment/notification',
-            'SuccessURL' => Yii::$app->params['baseUrl'] . '/course/master-group',
-            'FailURL' => Yii::$app->params['baseUrl'] . '/payment/fail',
+            'NotificationURL' => Yii::$app->params['baseUrl'] . '/sber/index',
+            'SuccessURL' => Yii::$app->params['baseUrl'] . '/course/master-group?tbank_success=true&tbank_order_id=' . $order->id,
+            'FailURL' => Yii::$app->params['baseUrl'] . '/course/master-group?tbank_success=false&tbank_order_id=' . $order->id,
             'Receipt' => [
                 'Items' => [
                     [
