@@ -16,9 +16,9 @@ return [
     'organizationData' => [
         'inn' => '1655455610',
     ],
-       'tinkoff' => [
-        'terminal_key' => '1734530309943DEMO',
-        'password' => 'k8gp6rvtkmyv06qc',
+    'tinkoff' => [
+        'terminal_key' => '1734530309943',
+        'password' => 'z5izvmmhozf4ctbo',
     ],
 
     'baseUrl' => 'https://lk.99ballov.ru',
